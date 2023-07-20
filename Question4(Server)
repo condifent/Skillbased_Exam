@@ -1,0 +1,54 @@
+import socket
+import threading
+import random
+
+
+quotes = [
+    "Ya Allah, jika dia adalah jodoh orang, hamba juga adalah orang Ya Allah - Nu'aiman",
+    "Dia bercerita tentang orang yang dia cintai dihadapan orang yang mencintainya - Fahri Skroepp",
+    "Dan aku menyerahkan semua urusanku kepada Allah - (QS Al Ghafir:44)",
+    "Manusia akan berubah dalam dua keadaan, jika kesedarannya meningkat dan jika hatinya hancur - Albert Einstein",
+    "Jika tak suka seseorang, bencilah perbuatan burukya dan bukan orangnya kerana mungkin jika dia bertaubat, dia akan menjadi lebih mulai dari kita - Daim>
+    "Jangan buang masa anda kepada seseorang yang belum pasti dalam hidup anda, sebaliknya fokuslah kepada orangtuamu yang sangat berjasa kepadamu - Daim",
+]
+
+# Function to handle a client's request
+def handle_client(client_socket):
+    quote = random.choice(quotes).encode('utf-8')
+    client_socket.send(quote)
+    client_socket.close()
+
+# Main server function
+def main():
+    host = "192.168.136.129"
+    port = 8888
+
+    # Create a socket object
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    # Bind the socket to a specific address and port
+    server_socket.bind((host, port))
+
+    # Listen for incoming connections (maximum 5 clients in the queue)
+    server_socket.listen(5)
+
+    print(f"Server listening on {host}:{port}")
+
+    while True:
+        try:
+            # Accept a client connection
+            client_socket, addr = server_socket.accept()
+            print(f"Accepted connection from {addr}")
+
+            # Create a new thread to handle the client's request
+            client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+            client_thread.start()
+        except KeyboardInterrupt:
+            print("Server shutting down...")
+            break
+
+    # Close the server socket
+    server_socket.close()
+
+if __name__ == "__main__":
+    main()
