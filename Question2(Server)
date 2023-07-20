@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8888
+
+int main() {
+    int sockfd, new_socket, client_length;
+    struct sockaddr_in server_addr, client_addr;
+    char buffer[1024];
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Prepare the server address
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    // Bind the socket to the specified address and port
+    if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error binding");
+        exit(EXIT_FAILURE);
+    }
+
+    // Listen for incoming connections
+    listen(sockfd, 1);
+
+    printf("Server waiting for connections...\n");
+
+    while (1) {
+        client_length = sizeof(client_addr);
+        // Accept the incoming connection
+        new_socket = accept(sockfd, (struct sockaddr *)&client_addr, &client_length);
+        if (new_socket == -1) {
+            perror("Error accepting connection");
+            exit(EXIT_FAILURE);
+        }
+
+        printf("Client connected.\n");
+
+        // Generate a random number between 100 and 999
+        srand(time(NULL));
+        int random_number = rand() % 900 + 100;
+
+        // Convert the random number to a string
+        snprintf(buffer, sizeof(buffer), "%d", random_number);
+
+        // Send the random number to the client
+        send(new_socket, buffer, sizeof(buffer), 0);
+
+        printf("Random number %d sent to the client.\n", random_number);
+
+        // Close the socket for this client
+        close(new_socket);
+    }
+
+    return 0;
+}
