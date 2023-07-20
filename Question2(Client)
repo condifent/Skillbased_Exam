@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#define PORT 8888
+
+int main() {
+    int sockfd;
+    struct sockaddr_in server_addr;
+    char buffer[1024];
+
+    // Create socket
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Prepare the server address
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("192.168.136.129"); // Connect to localhost
+    server_addr.sin_port = htons(PORT);
+
+    // Connect to the server
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Error connecting to server");
+        exit(EXIT_FAILURE);
+    }
+
+    // Receive the random number from the server
+    recv(sockfd, buffer, sizeof(buffer), 0);
+
+    // Convert the received string to an integer
+    int random_number = atoi(buffer);
+
+    // Display the received random number
+    printf("Received random number from server: %d\n", random_number);
+
+    // Close the socket
+    close(sockfd);
+
+    return 0;
+}
