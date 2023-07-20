@@ -1,7 +1,7 @@
 import socket
 
 def main():
-    host = "127.0.0.1"
+    host = "192.168.136.129"
     port = 8888
 
     # Create a socket object
